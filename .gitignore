@@ -7,3 +7,5 @@ dist/
 *.egg-info/
 .venv/
 .claude/settings.local.json
+.claude
+CLAUDE.md
