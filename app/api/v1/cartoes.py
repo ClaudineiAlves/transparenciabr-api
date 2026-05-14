@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 
 from app.schemas.cartoes import GastoCartao
+from app.schemas.comum import Pagina
 from app.services import cartoes as cartoes_service
 
 router = APIRouter(prefix="/cartoes", tags=["Cartões Corporativos"])
 
 
-@router.get("", response_model=list[GastoCartao])
+@router.get("", response_model=Pagina[GastoCartao])
 async def listar_gastos_cartao(
     mes_ano_inicio: str = Query(
         ..., description="Mês/ano inicial (MM/AAAA)", example="01/2025"
@@ -29,14 +30,11 @@ async def listar_gastos_cartao(
     Requer ao menos um dos filtros opcionais (órgão, portador ou estabelecimento),
     ou um período de até 12 meses.
     """
-    try:
-        return await cartoes_service.listar_gastos(
-            mes_ano_inicio=mes_ano_inicio,
-            mes_ano_fim=mes_ano_fim,
-            pagina=pagina,
-            codigo_orgao=codigo_orgao,
-            cpf_portador=cpf_portador,
-            cnpj_estabelecimento=cnpj_estabelecimento,
-        )
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return await cartoes_service.listar_gastos(
+        mes_ano_inicio=mes_ano_inicio,
+        mes_ano_fim=mes_ano_fim,
+        pagina=pagina,
+        codigo_orgao=codigo_orgao,
+        cpf_portador=cpf_portador,
+        cnpj_estabelecimento=cnpj_estabelecimento,
+    )

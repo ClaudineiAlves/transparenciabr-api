@@ -1,5 +1,9 @@
+import httpx
+
 from app.clients import transparencia
+from app.core.exceptions import PortalIndisponivel
 from app.schemas.cartoes import GastoCartao
+from app.schemas.comum import Pagina
 
 
 async def listar_gastos(
@@ -9,7 +13,7 @@ async def listar_gastos(
     codigo_orgao: str | None = None,
     cpf_portador: str | None = None,
     cnpj_estabelecimento: str | None = None,
-) -> list[GastoCartao]:
+) -> Pagina[GastoCartao]:
     params = {
         "mesAnoInicio": mes_ano_inicio,
         "mesAnoFim": mes_ano_fim,
@@ -22,5 +26,11 @@ async def listar_gastos(
     if cnpj_estabelecimento:
         params["cnpjEstabelecimento"] = cnpj_estabelecimento
 
-    data = await transparencia.get("/cartoes", params=params)
-    return [GastoCartao(**item) for item in data]
+    try:
+        data = await transparencia.get("/cartoes", params=params)
+    except httpx.HTTPStatusError as exc:
+        raise PortalIndisponivel(str(exc.response.status_code)) from exc
+    except httpx.RequestError as exc:
+        raise PortalIndisponivel(str(exc)) from exc
+
+    return Pagina(pagina=pagina, itens=[GastoCartao(**item) for item in data])
