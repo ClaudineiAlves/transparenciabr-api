@@ -10,10 +10,12 @@ router = APIRouter(prefix="/cartoes", tags=["Cartões Corporativos"])
 @router.get("", response_model=Pagina[GastoCartao])
 async def listar_gastos_cartao(
     mes_ano_inicio: str = Query(
-        ..., description="Mês/ano inicial (MM/AAAA)", example="01/2025"
+        ...,
+        description="Mês/ano inicial (MM/AAAA)",
+        examples=["01/2025"],
     ),
     mes_ano_fim: str = Query(
-        ..., description="Mês/ano final (MM/AAAA)", example="03/2025"
+        ..., description="Mês/ano final (MM/AAAA)", examples=["03/2025"]
     ),
     pagina: int = Query(1, ge=1, description="Número da página"),
     codigo_orgao: str | None = Query(None, description="Código SIAFI do órgão"),
