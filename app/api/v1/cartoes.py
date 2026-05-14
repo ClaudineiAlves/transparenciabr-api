@@ -8,12 +8,20 @@ router = APIRouter(prefix="/cartoes", tags=["Cartões Corporativos"])
 
 @router.get("", response_model=list[GastoCartao])
 async def listar_gastos_cartao(
-    mes_ano_inicio: str = Query(..., description="Mês/ano inicial (MM/AAAA)", example="01/2025"),
-    mes_ano_fim: str = Query(..., description="Mês/ano final (MM/AAAA)", example="03/2025"),
+    mes_ano_inicio: str = Query(
+        ..., description="Mês/ano inicial (MM/AAAA)", example="01/2025"
+    ),
+    mes_ano_fim: str = Query(
+        ..., description="Mês/ano final (MM/AAAA)", example="03/2025"
+    ),
     pagina: int = Query(1, ge=1, description="Número da página"),
     codigo_orgao: str | None = Query(None, description="Código SIAFI do órgão"),
-    cpf_portador: str | None = Query(None, description="CPF do portador (sem pontuação)"),
-    cnpj_estabelecimento: str | None = Query(None, description="CNPJ do estabelecimento (sem pontuação)"),
+    cpf_portador: str | None = Query(
+        None, description="CPF do portador (sem pontuação)"
+    ),
+    cnpj_estabelecimento: str | None = Query(
+        None, description="CNPJ do estabelecimento (sem pontuação)"
+    ),
 ):
     """
     Lista gastos realizados com cartões corporativos do governo federal.
