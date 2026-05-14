@@ -1,0 +1,160 @@
+# Transparência BR API — Requisições de teste
+# Extensão recomendada: REST Client (humao.rest-client) no VS Code
+# Docs interativa: http://localhost:8000/docs
+#
+# Setup:
+#   cp .env.example .env          # preencha TRANSPARENCIA_API_KEY
+#   docker compose up -d
+#   docker compose exec app alembic upgrade head
+
+@base = http://localhost:8000
+
+# ─────────────────────────────────────────────
+# HEALTH
+# ─────────────────────────────────────────────
+
+### Health check
+GET {{base}}/health
+
+
+# ─────────────────────────────────────────────
+# CARTÕES CORPORATIVOS — GET /v1/cartoes
+#
+# Parâmetros obrigatórios: mes_ano_inicio, mes_ano_fim
+# Filtros opcionais (*ao menos um é exigido pela API do Portal):
+#   codigo_orgao, cpf_portador, cnpj_estabelecimento
+# Formato de data: MM/AAAA
+# ─────────────────────────────────────────────
+
+### Gastos do MEC em janeiro/2025
+GET {{base}}/v1/cartoes
+  ?mes_ano_inicio=01/2025
+  &mes_ano_fim=01/2025
+  &codigo_orgao=26000
+  &pagina=1
+
+### Gastos do Ministério da Fazenda (MF) em janeiro/2025
+GET {{base}}/v1/cartoes
+  ?mes_ano_inicio=01/2025
+  &mes_ano_fim=01/2025
+  &codigo_orgao=25000
+  &pagina=1
+
+### Gastos filtrados por CNPJ do estabelecimento
+GET {{base}}/v1/cartoes
+  ?mes_ano_inicio=01/2025
+  &mes_ano_fim=03/2025
+  &cnpj_estabelecimento=02012862000160
+
+### Página 2 dos resultados
+GET {{base}}/v1/cartoes
+  ?mes_ano_inicio=01/2025
+  &mes_ano_fim=01/2025
+  &codigo_orgao=26000
+  &pagina=2
+
+### Erro esperado — sem filtro opcional (deve retornar 502 com mensagem)
+GET {{base}}/v1/cartoes
+  ?mes_ano_inicio=01/2025
+  &mes_ano_fim=01/2025
+
+### Erro esperado — parâmetro obrigatório ausente (deve retornar 422)
+GET {{base}}/v1/cartoes
+  ?mes_ano_inicio=01/2025
+
+
+# ─────────────────────────────────────────────
+# VIAGENS A SERVIÇO — GET /v1/viagens
+#
+# Parâmetros obrigatórios: codigo_orgao, data_ida_de, data_ida_ate,
+#                          data_retorno_de, data_retorno_ate
+# Formato de data: DD/MM/AAAA
+# ─────────────────────────────────────────────
+
+### Viagens do MEC em janeiro/2025
+GET {{base}}/v1/viagens
+  ?codigo_orgao=26000
+  &data_ida_de=01/01/2025
+  &data_ida_ate=31/01/2025
+  &data_retorno_de=01/01/2025
+  &data_retorno_ate=31/01/2025
+  &pagina=1
+
+### Viagens do Ministério da Saúde (MS)
+GET {{base}}/v1/viagens
+  ?codigo_orgao=36000
+  &data_ida_de=01/01/2025
+  &data_ida_ate=31/01/2025
+  &data_retorno_de=01/01/2025
+  &data_retorno_ate=31/01/2025
+
+### Erro esperado — parâmetro obrigatório ausente (deve retornar 422)
+GET {{base}}/v1/viagens
+  ?codigo_orgao=26000
+  &data_ida_de=01/01/2025
+
+
+# ─────────────────────────────────────────────
+# CONTRATOS — GET /v1/contratos
+#
+# Parâmetros obrigatórios: codigo_orgao, data_inicio_de, data_inicio_ate
+# Formato de data: DD/MM/AAAA
+# ─────────────────────────────────────────────
+
+### Contratos do MEC em janeiro/2025
+GET {{base}}/v1/contratos
+  ?codigo_orgao=26000
+  &data_inicio_de=01/01/2025
+  &data_inicio_ate=31/01/2025
+  &pagina=1
+
+### Contratos do Ministério da Defesa (MD)
+GET {{base}}/v1/contratos
+  ?codigo_orgao=52000
+  &data_inicio_de=01/01/2025
+  &data_inicio_ate=31/01/2025
+
+### Erro esperado — parâmetro obrigatório ausente (deve retornar 422)
+GET {{base}}/v1/contratos
+  ?codigo_orgao=26000
+
+
+# ─────────────────────────────────────────────
+# LICITAÇÕES — GET /v1/licitacoes
+#
+# Parâmetros obrigatórios: codigo_orgao, data_inicial, data_final
+# Formato de data: DD/MM/AAAA
+# Restrição da API do Portal: período máximo de 1 mês
+# ─────────────────────────────────────────────
+
+### Licitações do MEC em janeiro/2025
+GET {{base}}/v1/licitacoes
+  ?codigo_orgao=26000
+  &data_inicial=01/01/2025
+  &data_final=31/01/2025
+  &pagina=1
+
+### Licitações do Ministério da Infraestrutura
+GET {{base}}/v1/licitacoes
+  ?codigo_orgao=39252
+  &data_inicial=01/01/2025
+  &data_final=31/01/2025
+
+### Erro esperado — parâmetro obrigatório ausente (deve retornar 422)
+GET {{base}}/v1/licitacoes
+  ?codigo_orgao=26000
+  &data_inicial=01/01/2025
+
+
+# ─────────────────────────────────────────────
+# CÓDIGOS DE ÓRGÃOS (SIAFI) — referência rápida
+#
+#   26000  Ministério da Educação (MEC)
+#   25000  Ministério da Fazenda (MF)
+#   36000  Ministério da Saúde (MS)
+#   52000  Ministério da Defesa (MD)
+#   39252  Ministério da Infraestrutura
+#   20000  Presidência da República
+#   30000  Ministério da Justiça
+#   22000  Ministério das Relações Exteriores
+# ─────────────────────────────────────────────
