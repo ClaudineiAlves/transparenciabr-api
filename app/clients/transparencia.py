@@ -10,7 +10,12 @@ _MAX_RETRIES = 3
 def _build_client() -> httpx.AsyncClient:
     return httpx.AsyncClient(
         base_url=_BASE_URL,
-        headers={"chave-api-dados": settings.transparencia_api_key},
+        headers={
+            "chave-api-dados": settings.transparencia_api_key,
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "pt-BR,pt;q=0.9",
+        },
         timeout=_TIMEOUT,
     )
 
