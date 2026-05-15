@@ -1,12 +1,12 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-import app.models  # noqa: F401 — registers all models with Base.metadata
 import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
+import app.models  # noqa: F401 — registers all models with Base.metadata
 from app.api.v1.router import router as v1_router
 from app.core.database import Base, engine
 from app.core.exceptions import (
