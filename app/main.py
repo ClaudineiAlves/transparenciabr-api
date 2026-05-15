@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -23,12 +24,17 @@ _STATIC_INDEX = Path(__file__).parent.parent / "static" / "index.html"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("Iniciando app...")
     try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+        async with asyncio.timeout(15):
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
         logger.info("Banco de dados pronto.")
+    except TimeoutError:
+        logger.error("Timeout (15s) ao conectar ao banco — app iniciado sem tabelas.")
     except Exception as exc:
-        logger.error("Falha ao conectar/criar tabelas no banco: %s", exc)
+        logger.error("Falha ao criar tabelas: %s", exc)
+    logger.info("App pronto para receber requisições.")
     yield
 
 
