@@ -68,6 +68,59 @@ Lista gastos realizados com cartões corporativos do governo federal.
 curl "http://localhost:8000/v1/cartoes?mes_ano_inicio=01/2025&mes_ano_fim=01/2025&codigo_orgao=26000"
 ```
 
+### `GET /v1/viagens`
+
+Lista viagens a serviço realizadas por servidores federais.
+
+| Parâmetro | Tipo | Obrigatório | Descrição |
+|-----------|------|-------------|-----------|
+| `codigo_orgao` | string | sim | Código SIAFI do órgão |
+| `data_ida_de` | string | sim | Data de ida inicial (`DD/MM/AAAA`) |
+| `data_ida_ate` | string | sim | Data de ida final (`DD/MM/AAAA`) |
+| `data_retorno_de` | string | sim | Data de retorno inicial (`DD/MM/AAAA`) |
+| `data_retorno_ate` | string | sim | Data de retorno final (`DD/MM/AAAA`) |
+| `pagina` | int | não | Página (default: 1) |
+
+**Exemplo:**
+
+```bash
+curl "http://localhost:8000/v1/viagens?codigo_orgao=26000&data_ida_de=01/01/2025&data_ida_ate=31/01/2025&data_retorno_de=01/01/2025&data_retorno_ate=31/01/2025"
+```
+
+### `GET /v1/contratos`
+
+Lista contratos celebrados pelo governo federal.
+
+| Parâmetro | Tipo | Obrigatório | Descrição |
+|-----------|------|-------------|-----------|
+| `codigo_orgao` | string | sim | Código SIAFI do órgão |
+| `data_inicio_de` | string | sim | Data de início inicial (`DD/MM/AAAA`) |
+| `data_inicio_ate` | string | sim | Data de início final (`DD/MM/AAAA`) |
+| `pagina` | int | não | Página (default: 1) |
+
+**Exemplo:**
+
+```bash
+curl "http://localhost:8000/v1/contratos?codigo_orgao=26000&data_inicio_de=01/01/2025&data_inicio_ate=31/01/2025"
+```
+
+### `GET /v1/licitacoes`
+
+Lista licitações realizadas pelo governo federal (período máximo: 1 mês).
+
+| Parâmetro | Tipo | Obrigatório | Descrição |
+|-----------|------|-------------|-----------|
+| `codigo_orgao` | string | sim | Código SIAFI do órgão |
+| `data_inicial` | string | sim | Data de abertura inicial (`DD/MM/AAAA`) |
+| `data_final` | string | sim | Data de abertura final (`DD/MM/AAAA`) |
+| `pagina` | int | não | Página (default: 1) |
+
+**Exemplo:**
+
+```bash
+curl "http://localhost:8000/v1/licitacoes?codigo_orgao=26000&data_inicial=01/01/2025&data_final=31/01/2025"
+```
+
 ## Desenvolvimento
 
 ```bash

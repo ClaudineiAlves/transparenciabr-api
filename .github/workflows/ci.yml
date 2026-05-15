@@ -47,4 +47,4 @@ jobs:
           cache: pip
       - run: pip install -e ".[dev]"
       - run: alembic upgrade head
-      - run: pytest
+      - run: pytest --cov=app --cov-report=term-missing --cov-fail-under=70
