@@ -2,7 +2,6 @@
 builder = "DOCKERFILE"
 
 [deploy]
-preDeployCommand = "alembic upgrade head || alembic stamp head"
 healthcheckPath = "/health"
 healthcheckTimeout = 60
 restartPolicyType = "ON_FAILURE"
