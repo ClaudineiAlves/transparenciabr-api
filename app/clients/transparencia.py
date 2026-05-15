@@ -1,6 +1,7 @@
 import httpx
 
 from app.core.config import settings
+from app.core.exceptions import ParametrosInvalidos
 
 _BASE_URL = "https://api.portaldatransparencia.gov.br/api-de-dados"
 _TIMEOUT = 30.0
@@ -37,6 +38,17 @@ async def get(path: str, params: dict | None = None) -> dict | list:
                 retry_after = int(response.headers.get("Retry-After", 5))
                 await asyncio.sleep(retry_after)
                 continue
+            if response.status_code == 400:
+                try:
+                    detail = response.json()
+                    msg = (
+                        next(iter(detail.values()))
+                        if isinstance(detail, dict)
+                        else str(detail)
+                    )
+                except Exception:
+                    msg = response.text
+                raise ParametrosInvalidos(msg)
             response.raise_for_status()
             return response.json()
     response.raise_for_status()

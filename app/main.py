@@ -10,8 +10,10 @@ from fastapi.responses import HTMLResponse
 import app.models  # noqa: F401 — registers all models with Base.metadata
 from app.api.v1.router import router as v1_router
 from app.core.exceptions import (
+    ParametrosInvalidos,
     PortalIndisponivel,
     handler_http_status,
+    handler_parametros_invalidos,
     handler_portal_indisponivel,
 )
 
@@ -41,6 +43,7 @@ app.add_middleware(
 )
 
 app.add_exception_handler(PortalIndisponivel, handler_portal_indisponivel)
+app.add_exception_handler(ParametrosInvalidos, handler_parametros_invalidos)
 app.add_exception_handler(httpx.HTTPStatusError, handler_http_status)
 
 app.include_router(v1_router)

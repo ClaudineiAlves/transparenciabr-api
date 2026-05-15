@@ -78,3 +78,24 @@ async def test_listar_licitacoes_portal_indisponivel(client, httpx_mock: HTTPXMo
     )
 
     assert response.status_code == 502
+
+
+@pytest.mark.asyncio
+async def test_listar_licitacoes_parametros_invalidos(client, httpx_mock: HTTPXMock):
+    httpx_mock.add_response(
+        url=re.compile(r".*/licitacoes.*"),
+        status_code=400,
+        json={"mensagem": "Período máximo permitido é de 1 mês"},
+    )
+
+    response = await client.get(
+        "/v1/licitacoes",
+        params={
+            "codigo_orgao": "26000",
+            "data_inicial": "01/01/2025",
+            "data_final": "31/12/2025",
+        },
+    )
+
+    assert response.status_code == 422
+    assert "mensagem" in response.json()
