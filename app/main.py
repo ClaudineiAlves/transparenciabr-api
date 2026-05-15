@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -15,11 +16,19 @@ from app.core.exceptions import (
     handler_portal_indisponivel,
 )
 
+logger = logging.getLogger(__name__)
+
+_STATIC_INDEX = Path(__file__).parent.parent / "static" / "index.html"
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Banco de dados pronto.")
+    except Exception as exc:
+        logger.error("Falha ao conectar/criar tabelas no banco: %s", exc)
     yield
 
 
@@ -50,4 +59,4 @@ async def health():
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def frontend():
-    return Path("static/index.html").read_text(encoding="utf-8")
+    return _STATIC_INDEX.read_text(encoding="utf-8")
