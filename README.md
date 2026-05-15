@@ -1,7 +1,7 @@
 # Transparência BR API
 
 API REST que agrega e expõe dados de transparência do governo federal brasileiro, consumindo o [Portal da Transparência (CGU)](https://portaldatransparencia.gov.br/).
-
+Acesse aqui e teste: https://transparenciabr-api-production.up.railway.app/
 ## Stack
 
 - **FastAPI** — framework web async
