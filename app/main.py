@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -10,7 +9,6 @@ from fastapi.responses import HTMLResponse
 
 import app.models  # noqa: F401 — registers all models with Base.metadata
 from app.api.v1.router import router as v1_router
-from app.core.database import Base, engine
 from app.core.exceptions import (
     PortalIndisponivel,
     handler_http_status,
@@ -24,17 +22,7 @@ _STATIC_INDEX = Path(__file__).parent.parent / "static" / "index.html"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Iniciando app...")
-    try:
-        async with asyncio.timeout(15):
-            async with engine.begin() as conn:
-                await conn.run_sync(Base.metadata.create_all)
-        logger.info("Banco de dados pronto.")
-    except TimeoutError:
-        logger.error("Timeout (15s) ao conectar ao banco — app iniciado sem tabelas.")
-    except Exception as exc:
-        logger.error("Falha ao criar tabelas: %s", exc)
-    logger.info("App pronto para receber requisições.")
+    logger.info("App iniciado.")
     yield
 
 
