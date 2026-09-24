@@ -1,51 +1,71 @@
 # Transparência BR API
 
-API REST que agrega e expõe dados de transparência do governo federal brasileiro, consumindo o [Portal da Transparência (CGU)](https://portaldatransparencia.gov.br/).
-Acesse aqui e teste: https://transparenciabr-api-production.up.railway.app/
+[![CI](https://github.com/ClaudineiAlves/transparenciabr-api/actions/workflows/ci.yml/badge.svg)](https://github.com/ClaudineiAlves/transparenciabr-api/actions/workflows/ci.yml)
+![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?logo=fastapi&logoColor=white)
+![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+
+API REST assíncrona que expõe quatro datasets do [Portal da Transparência da CGU](https://portaldatransparencia.gov.br/) — cartões corporativos, viagens a serviço, contratos e licitações — em endpoints versionados `/v1/`, com documentação Swagger/ReDoc gerada do próprio código.
+
+<!-- Quando o deploy voltar a responder, adicione aqui:
+**Demo:** https://transparenciabr-api-production.up.railway.app/docs -->
+
+## Decisões de engenharia
+
+- **Camadas explícitas.** `api/v1` (rotas), `services` (regra de negócio), `clients` (integração com o Portal), `schemas` (contratos Pydantic), `models` (ORM) e `core` (configuração, banco e exceções). A regra de negócio não conhece o FastAPI nem o formato da API externa.
+- **Integração resiliente.** O cliente `httpx` tem timeout explícito e faz retry automático quando o Portal responde `429`, respeitando o header `Retry-After`. Exceções próprias (`PortalIndisponivel`, `ParametrosInvalidos`) são tratadas em handlers centralizados: erro ou indisponibilidade do Portal vira resposta previsível da API, não stack trace.
+- **Testes que não dependem da fonte.** pytest + pytest-asyncio cobrindo os quatro recursos, com o Portal mockado via `pytest-httpx`: a suíte roda mesmo quando a API do governo está fora.
+- **Banco versionado.** PostgreSQL com SQLAlchemy 2 assíncrono (`asyncpg`) e migrations Alembic: o ambiente sobe do zero com `alembic upgrade head`, sem passo manual.
+- **Operação.** `GET /health`, CORS configurado e imagem Docker que lê a porta da variável `PORT`, pronta para PaaS como o Railway.
+
 ## Stack
 
-- **FastAPI** — framework web async
-- **PostgreSQL + asyncpg** — banco de dados
-- **SQLAlchemy 2 (async)** — ORM
-- **Alembic** — migrações de banco
-- **httpx** — cliente HTTP async para o Portal da Transparência
+| Camada | Tecnologia |
+|---|---|
+| API | FastAPI, Pydantic |
+| Banco | PostgreSQL, SQLAlchemy 2 (async), asyncpg, Alembic |
+| Integração | httpx (async) |
+| Testes e qualidade | pytest, pytest-asyncio, pytest-httpx, pytest-cov, ruff |
+| Infra | Docker, Docker Compose, GitHub Actions |
 
-## Requisitos
+## Como rodar
 
-- Python 3.11+
-- PostgreSQL
-- Chave de API do Portal da Transparência ([solicitar aqui](https://portaldatransparencia.gov.br/api-de-dados/cadastrar-email))
+Você vai precisar de uma chave da API do Portal da Transparência ([solicitar aqui](https://portaldatransparencia.gov.br/api-de-dados/cadastrar-email)).
 
-## Instalação
+### Com Docker
+
+```bash
+cp .env.example .env                          # preencha TRANSPARENCIA_API_KEY
+docker compose up -d --build                  # sobe PostgreSQL 16 + API
+docker compose exec app alembic upgrade head  # cria as tabelas
+```
+
+A API fica em `http://localhost:8000`: documentação interativa em `/docs` (Swagger) e `/redoc`, health check em `/health`. A raiz (`/`) serve uma página HTML (`static/index.html`) que consulta os quatro endpoints.
+
+### Sem Docker
+
+Requisitos: Python 3.11+ e um PostgreSQL acessível.
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
+
+cp .env.example .env           # edite com suas credenciais
+alembic upgrade head
+uvicorn app.main:app --reload
 ```
 
-Configure as variáveis de ambiente:
-
-```bash
-cp .env.example .env
-# edite .env com suas credenciais
-```
+Variáveis de ambiente:
 
 ```env
 DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/transparencia_br
 TRANSPARENCIA_API_KEY=sua_chave_aqui
 ```
 
-Rode as migrações e suba o servidor:
-
-```bash
-alembic upgrade head
-uvicorn app.main:app --reload
-```
-
-Acesse a documentação interativa em `http://localhost:8000/docs`.
-
 ## Endpoints
+
+Todos os recursos são paginados pelo parâmetro `pagina` e respondem com schemas Pydantic (`Pagina[...]`).
 
 ### `GET /v1/cartoes`
 
@@ -121,17 +141,27 @@ Lista licitações realizadas pelo governo federal (período máximo: 1 mês).
 curl "http://localhost:8000/v1/licitacoes?codigo_orgao=26000&data_inicial=01/01/2025&data_final=31/01/2025"
 ```
 
-## Desenvolvimento
+### `GET /health`
+
+Health check da aplicação, para monitoramento e para a plataforma de deploy.
+
+## Testes e qualidade
+
+Os testes chamam a aplicação em processo (`httpx.ASGITransport`) e mockam o Portal com `pytest-httpx`. Para cada recurso, cobrem a página de resultados e o Portal indisponível; os de cartões também cobrem o parâmetro de paginação e a falta de filtros obrigatórios, e os de licitações, parâmetros inválidos.
 
 ```bash
-# Testes
-pytest
+pytest --cov=app --cov-report=term-missing   # testes com cobertura
+ruff check . && ruff format --check .        # lint e formatação
+```
 
-# Lint
-ruff check .
-ruff format .
+O [workflow de CI](.github/workflows/ci.yml) roda a cada push e pull request na `main`, em dois jobs:
 
-# Nova migration após alterar models
+- **lint:** `ruff check` e `ruff format --check`;
+- **test:** sobe um PostgreSQL 16 como serviço, aplica as migrations e roda o pytest com `--cov-fail-under=70`, ou seja, o build quebra se a cobertura cair abaixo de 70%.
+
+Nova migration depois de alterar os models:
+
+```bash
 alembic revision --autogenerate -m "descrição"
 alembic upgrade head
 ```
@@ -140,16 +170,25 @@ alembic upgrade head
 
 ```
 app/
-  main.py              # app FastAPI + lifespan
+  main.py              # app FastAPI, lifespan, CORS, handlers de exceção, /health
   core/
     config.py          # settings via pydantic-settings
     database.py        # engine async + sessão + Base ORM
-  api/v1/              # rotas versionadas
+    exceptions.py      # PortalIndisponivel, ParametrosInvalidos
+  api/v1/              # rotas versionadas (uma por recurso)
   clients/
-    transparencia.py   # client HTTP com retry em 429
+    transparencia.py   # cliente httpx com timeout e retry em 429
+  services/            # regra de negócio
+  schemas/             # contratos Pydantic de entrada e saída
   models/              # modelos SQLAlchemy
-  schemas/             # schemas Pydantic
-  services/            # lógica de negócio
-alembic/               # migrações
-tests/                 # pytest + pytest-asyncio
+alembic/               # migrations
+static/index.html      # página servida na raiz
+tests/                 # pytest + pytest-asyncio + pytest-httpx
+Dockerfile
+docker-compose.yml     # PostgreSQL 16 + API com reload
 ```
+
+## Autor
+
+**Claudinei Alves Reis** — estudante de Ciência de Dados e IA na PUC-Campinas.
+[LinkedIn](https://www.linkedin.com/in/claudinei-alves-reis/) · [Portfólio](https://claudineiportfolio.vercel.app)
