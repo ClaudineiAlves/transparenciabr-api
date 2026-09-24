@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: transparenciabr-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    # O plano free não tem preDeployCommand: as migrations rodam no start.
+    # Se o banco estiver indisponível, a API sobe mesmo assim (nenhuma rota depende dele).
+    dockerCommand: >-
+      sh -c "(alembic upgrade head || alembic stamp head || true)
+      && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: transparenciabr-db
+          property: connectionString
+      - key: TRANSPARENCIA_API_KEY
+        sync: false
+
+databases:
+  - name: transparenciabr-db
+    plan: free
