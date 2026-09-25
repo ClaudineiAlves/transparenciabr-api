@@ -1,0 +1,20 @@
+name: Keep alive
+
+# O plano free do Render dorme após 15 min ocioso; o ping evita o cold start da demo.
+# /health não toca no banco, então o Neon continua podendo dormir.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: >-
+          curl --fail --silent --show-error --max-time 90
+          --retry 2 --retry-delay 10
+          https://transparenciabr-api.onrender.com/health
