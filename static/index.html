@@ -32,7 +32,7 @@
 <!-- Header -->
 <header class="bg-green-800 text-white shadow-lg">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3">
-        <span class="text-2xl">🇧🇷</span>
+        <span class="text-2xl" aria-hidden="true">🇧🇷</span>
         <div>
             <h1 class="text-lg font-bold tracking-wide">Transparência BR</h1>
             <p class="text-green-300 text-xs">Dados do Portal da Transparência do Governo Federal</p>
@@ -47,90 +47,93 @@
 <main class="max-w-7xl mx-auto px-4 py-6">
 
     <!-- Tabs -->
-    <div class="flex flex-wrap gap-1 mb-5 bg-white rounded-xl p-1 shadow-sm w-fit">
-        <button onclick="showTab('cartoes')" id="btn-cartoes" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all bg-green-700 text-white">💳 Cartões</button>
-        <button onclick="showTab('viagens')" id="btn-viagens" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-gray-500 hover:bg-gray-50">✈️ Viagens</button>
-        <button onclick="showTab('contratos')" id="btn-contratos" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-gray-500 hover:bg-gray-50">📄 Contratos</button>
-        <button onclick="showTab('licitacoes')" id="btn-licitacoes" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-gray-500 hover:bg-gray-50">🏛️ Licitações</button>
+    <div role="tablist" aria-label="Conjuntos de dados" class="flex flex-wrap gap-1 mb-5 bg-white rounded-xl p-1 shadow-sm w-fit">
+        <button role="tab" aria-selected="true" aria-controls="tab-cartoes" onclick="showTab('cartoes')" id="btn-cartoes" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all bg-green-700 text-white"><span aria-hidden="true">💳</span> Cartões</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-viagens" tabindex="-1" onclick="showTab('viagens')" id="btn-viagens" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-gray-500 hover:bg-gray-50"><span aria-hidden="true">✈️</span> Viagens</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-contratos" tabindex="-1" onclick="showTab('contratos')" id="btn-contratos" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-gray-500 hover:bg-gray-50"><span aria-hidden="true">📄</span> Contratos</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-licitacoes" tabindex="-1" onclick="showTab('licitacoes')" id="btn-licitacoes" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-gray-500 hover:bg-gray-50"><span aria-hidden="true">🏛️</span> Licitações</button>
     </div>
 
+    <!-- Anuncia o fim de cada busca sem o leitor de tela ler a tabela inteira -->
+    <p id="status-busca" class="sr-only" role="status" aria-live="polite"></p>
+
     <!-- ── CARTÕES ── -->
-    <div id="tab-cartoes" class="tab-panel">
+    <div id="tab-cartoes" class="tab-panel" role="tabpanel" aria-labelledby="btn-cartoes">
         <div class="bg-white rounded-xl shadow-sm p-5 mb-4">
             <h2 class="text-base font-semibold text-gray-700 mb-4">Gastos com Cartão Corporativo</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div><label class="label">Mês/Ano Início</label><input id="c-inicio" value="01/2025" placeholder="MM/AAAA" class="input"></div>
-                <div><label class="label">Mês/Ano Fim</label><input id="c-fim" value="01/2025" placeholder="MM/AAAA" class="input"></div>
-                <div><label class="label">Código Órgão</label><input id="c-orgao" value="26000" placeholder="ex: 26000" class="input orgao-input"></div>
-                <div><label class="label">Página</label><input id="c-pagina" value="1" type="number" min="1" class="input"></div>
+                <div><label class="label" for="c-inicio">Mês/Ano Início</label><input id="c-inicio" value="01/2025" placeholder="MM/AAAA" class="input"></div>
+                <div><label class="label" for="c-fim">Mês/Ano Fim</label><input id="c-fim" value="01/2025" placeholder="MM/AAAA" class="input"></div>
+                <div><label class="label" for="c-orgao">Código Órgão</label><input id="c-orgao" value="26000" placeholder="ex: 26000" class="input orgao-input"></div>
+                <div><label class="label" for="c-pagina">Página</label><input id="c-pagina" value="1" type="number" min="1" class="input"></div>
             </div>
             <div class="flex gap-3 items-center mt-4 flex-wrap">
                 <button onclick="buscarCartoes()" class="btn-buscar">Buscar</button>
-                <span class="text-xs text-gray-400">Filtros opcionais: CNPJ do estabelecimento ou CPF do portador</span>
+                <span class="text-xs text-gray-500">Filtros opcionais: CNPJ do estabelecimento ou CPF do portador</span>
             </div>
         </div>
-        <div id="res-cartoes"></div>
+        <div id="res-cartoes" aria-busy="false"></div>
     </div>
 
     <!-- ── VIAGENS ── -->
-    <div id="tab-viagens" class="tab-panel hidden">
+    <div id="tab-viagens" class="tab-panel hidden" role="tabpanel" aria-labelledby="btn-viagens">
         <div class="bg-white rounded-xl shadow-sm p-5 mb-4">
             <h2 class="text-base font-semibold text-gray-700 mb-4">Viagens a Serviço de Servidores</h2>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <div><label class="label">Código Órgão</label><input id="v-orgao" value="26000" class="input orgao-input"></div>
-                <div><label class="label">Data Ida De</label><input id="v-ida-de" value="01/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
-                <div><label class="label">Data Ida Até</label><input id="v-ida-ate" value="31/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
-                <div><label class="label">Data Retorno De</label><input id="v-ret-de" value="01/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
-                <div><label class="label">Data Retorno Até</label><input id="v-ret-ate" value="31/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
-                <div><label class="label">Página</label><input id="v-pagina" value="1" type="number" min="1" class="input"></div>
+                <div><label class="label" for="v-orgao">Código Órgão</label><input id="v-orgao" value="26000" class="input orgao-input"></div>
+                <div><label class="label" for="v-ida-de">Data Ida De</label><input id="v-ida-de" value="01/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
+                <div><label class="label" for="v-ida-ate">Data Ida Até</label><input id="v-ida-ate" value="31/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
+                <div><label class="label" for="v-ret-de">Data Retorno De</label><input id="v-ret-de" value="01/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
+                <div><label class="label" for="v-ret-ate">Data Retorno Até</label><input id="v-ret-ate" value="31/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
+                <div><label class="label" for="v-pagina">Página</label><input id="v-pagina" value="1" type="number" min="1" class="input"></div>
             </div>
             <button onclick="buscarViagens()" class="btn-buscar mt-4">Buscar</button>
         </div>
-        <div id="res-viagens"></div>
+        <div id="res-viagens" aria-busy="false"></div>
     </div>
 
     <!-- ── CONTRATOS ── -->
-    <div id="tab-contratos" class="tab-panel hidden">
+    <div id="tab-contratos" class="tab-panel hidden" role="tabpanel" aria-labelledby="btn-contratos">
         <div class="bg-white rounded-xl shadow-sm p-5 mb-4">
             <h2 class="text-base font-semibold text-gray-700 mb-4">Contratos Celebrados</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div><label class="label">Código Órgão</label><input id="ct-orgao" value="26000" class="input orgao-input"></div>
-                <div><label class="label">Data Início De</label><input id="ct-de" value="01/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
-                <div><label class="label">Data Início Até</label><input id="ct-ate" value="31/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
-                <div><label class="label">Página</label><input id="ct-pagina" value="1" type="number" min="1" class="input"></div>
+                <div><label class="label" for="ct-orgao">Código Órgão</label><input id="ct-orgao" value="26000" class="input orgao-input"></div>
+                <div><label class="label" for="ct-de">Data Início De</label><input id="ct-de" value="01/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
+                <div><label class="label" for="ct-ate">Data Início Até</label><input id="ct-ate" value="31/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
+                <div><label class="label" for="ct-pagina">Página</label><input id="ct-pagina" value="1" type="number" min="1" class="input"></div>
             </div>
             <button onclick="buscarContratos()" class="btn-buscar mt-4">Buscar</button>
         </div>
-        <div id="res-contratos"></div>
+        <div id="res-contratos" aria-busy="false"></div>
     </div>
 
     <!-- ── LICITAÇÕES ── -->
-    <div id="tab-licitacoes" class="tab-panel hidden">
+    <div id="tab-licitacoes" class="tab-panel hidden" role="tabpanel" aria-labelledby="btn-licitacoes">
         <div class="bg-white rounded-xl shadow-sm p-5 mb-4">
             <h2 class="text-base font-semibold text-gray-700 mb-4">Licitações</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div><label class="label">Código Órgão</label><input id="l-orgao" value="25000" class="input orgao-input"></div>
-                <div><label class="label">Data Inicial</label><input id="l-de" value="01/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
-                <div><label class="label">Data Final</label><input id="l-ate" value="31/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
-                <div><label class="label">Página</label><input id="l-pagina" value="1" type="number" min="1" class="input"></div>
+                <div><label class="label" for="l-orgao">Código Órgão</label><input id="l-orgao" value="25000" class="input orgao-input"></div>
+                <div><label class="label" for="l-de">Data Inicial</label><input id="l-de" value="01/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
+                <div><label class="label" for="l-ate">Data Final</label><input id="l-ate" value="31/01/2025" placeholder="DD/MM/AAAA" class="input"></div>
+                <div><label class="label" for="l-pagina">Página</label><input id="l-pagina" value="1" type="number" min="1" class="input"></div>
             </div>
-            <p class="text-xs text-amber-600 mt-2">⚠️ Período máximo: 1 mês</p>
+            <p class="text-xs text-amber-700 mt-2"><span aria-hidden="true">⚠️</span> Período máximo: 1 mês</p>
             <button onclick="buscarLicitacoes()" class="btn-buscar mt-3">Buscar</button>
         </div>
-        <div id="res-licitacoes"></div>
+        <div id="res-licitacoes" aria-busy="false"></div>
     </div>
 
     <!-- Referência SIAFI -->
     <div class="mt-6 bg-white rounded-xl shadow-sm p-5">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Códigos SIAFI — clique para usar</p>
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Códigos SIAFI — clique para usar</p>
         <div class="flex flex-wrap gap-2">
-            <span class="code-badge" onclick="setOrgao('26000')">26000 · MEC</span>
-            <span class="code-badge" onclick="setOrgao('25000')">25000 · Fazenda</span>
-            <span class="code-badge" onclick="setOrgao('36000')">36000 · Saúde</span>
-            <span class="code-badge" onclick="setOrgao('52000')">52000 · Defesa</span>
-            <span class="code-badge" onclick="setOrgao('20000')">20000 · Presidência</span>
-            <span class="code-badge" onclick="setOrgao('30000')">30000 · Justiça</span>
-            <span class="code-badge" onclick="setOrgao('22000')">22000 · Relações Exteriores</span>
+            <button type="button" class="code-badge" onclick="setOrgao('26000')">26000 · MEC</button>
+            <button type="button" class="code-badge" onclick="setOrgao('25000')">25000 · Fazenda</button>
+            <button type="button" class="code-badge" onclick="setOrgao('36000')">36000 · Saúde</button>
+            <button type="button" class="code-badge" onclick="setOrgao('52000')">52000 · Defesa</button>
+            <button type="button" class="code-badge" onclick="setOrgao('20000')">20000 · Presidência</button>
+            <button type="button" class="code-badge" onclick="setOrgao('30000')">30000 · Justiça</button>
+            <button type="button" class="code-badge" onclick="setOrgao('22000')">22000 · Relações Exteriores</button>
         </div>
     </div>
 
@@ -149,16 +152,50 @@ function showTab(name) {
     const btn = document.getElementById('btn-' + name)
     btn.classList.add('bg-green-700','text-white')
     btn.classList.remove('text-gray-500','hover:bg-gray-50')
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        const ativa = b === btn
+        b.setAttribute('aria-selected', ativa)
+        b.tabIndex = ativa ? 0 : -1
+    })
+}
+
+// Padrão de abas do WAI-ARIA: Tab entra na aba ativa, as setas trocam de aba
+document.querySelector('[role="tablist"]').addEventListener('keydown', e => {
+    const tabs = [...document.querySelectorAll('.tab-btn')]
+    const atual = tabs.indexOf(document.activeElement)
+    const destino = {
+        ArrowRight: (atual + 1) % tabs.length,
+        ArrowLeft: (atual - 1 + tabs.length) % tabs.length,
+        Home: 0,
+        End: tabs.length - 1,
+    }[e.key]
+    if (atual < 0 || destino === undefined) return
+    e.preventDefault()
+    showTab(tabs[destino].id.replace('btn-', ''))
+    tabs[destino].focus()
+})
+
+function anunciar(msg) {
+    document.getElementById('status-busca').textContent = msg
+}
+
+function pronto(id) {
+    document.getElementById(id).setAttribute('aria-busy', 'false')
 }
 
 function setOrgao(code) {
     const active = document.querySelector('.tab-panel:not(.hidden)')
-    active.querySelector('.orgao-input').value = code
+    const input = active.querySelector('.orgao-input')
+    input.value = code
+    // o foco no campo faz o leitor de tela anunciar o novo valor
+    input.focus()
 }
 
 function loading(id) {
+    anunciar('')
+    document.getElementById(id).setAttribute('aria-busy', 'true')
     document.getElementById(id).innerHTML = `
-        <div class="bg-white rounded-xl shadow-sm p-12 text-center text-gray-400">
+        <div class="bg-white rounded-xl shadow-sm p-12 text-center text-gray-500">
             <div class="spin mx-auto mb-3"></div>
             <p class="text-sm">Consultando o Portal da Transparência...</p>
         </div>`
@@ -166,9 +203,10 @@ function loading(id) {
 
 function empty(id) {
     document.getElementById(id).innerHTML = `
-        <div class="bg-white rounded-xl shadow-sm p-10 text-center text-gray-400 text-sm">
+        <div class="bg-white rounded-xl shadow-sm p-10 text-center text-gray-500 text-sm">
             Nenhum resultado encontrado para os filtros informados.
         </div>`
+    anunciar('Nenhum resultado encontrado para os filtros informados.')
 }
 
 function error(id, msg) {
@@ -176,10 +214,11 @@ function error(id, msg) {
         <div class="bg-red-50 border border-red-200 rounded-xl p-5 text-red-700 text-sm">
             <strong>Erro:</strong> ${msg}
         </div>`
+    anunciar('Erro: ' + msg)
 }
 
 function footer(pagina, total) {
-    return `<p class="text-xs text-gray-400 mt-2 px-1">Página ${pagina} · ${total} item(s) retornado(s)</p>`
+    return `<p class="text-xs text-gray-600 mt-2 px-1">Página ${pagina} · ${total} item(s) retornado(s)</p>`
 }
 
 async function get(path, params) {
@@ -206,7 +245,7 @@ async function buscarCartoes() {
         if (!d.itens.length) return empty(id)
         document.getElementById(id).innerHTML = `
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto"><table>
+            <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Resultados de cartões"><table>
                 <thead><tr>
                     <th>Data</th><th>Valor (R$)</th><th>Tipo Cartão</th>
                     <th>Estabelecimento</th><th>Órgão</th><th>Portador</th>
@@ -215,12 +254,13 @@ async function buscarCartoes() {
                     <td>${i.dataTransacao}</td>
                     <td class="font-mono font-semibold text-green-700">${i.valorTransacao}</td>
                     <td class="text-xs">${i.tipoCartao.descricao}</td>
-                    <td>${i.estabelecimento.nome}<br><span class="text-gray-400 text-xs">${i.estabelecimento.cnpjFormatado}</span></td>
+                    <td>${i.estabelecimento.nome}<br><span class="text-gray-500 text-xs">${i.estabelecimento.cnpjFormatado}</span></td>
                     <td class="text-xs">${i.unidadeGestora.orgaoMaximo.sigla}</td>
                     <td class="text-xs">${i.portador.nome}</td>
                 </tr>`).join('')}</tbody>
             </table></div></div>${footer(d.pagina, d.itens.length)}`
-    } catch(e) { error(id, e.message) }
+        anunciar(`${d.itens.length} item(s) retornado(s), página ${d.pagina}`)
+    } catch(e) { error(id, e.message) } finally { pronto(id) }
 }
 
 // ── Viagens ──
@@ -238,7 +278,7 @@ async function buscarViagens() {
         if (!d.itens.length) return empty(id)
         document.getElementById(id).innerHTML = `
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto"><table>
+            <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Resultados de viagens"><table>
                 <thead><tr>
                     <th>Beneficiário</th><th>Situação</th><th>Tipo</th>
                     <th>Período</th><th>Passagem (R$)</th><th>Total (R$)</th>
@@ -252,7 +292,8 @@ async function buscarViagens() {
                     <td class="font-mono font-semibold text-green-700">${brl(i.valorTotalViagem)}</td>
                 </tr>`).join('')}</tbody>
             </table></div></div>${footer(d.pagina, d.itens.length)}`
-    } catch(e) { error(id, e.message) }
+        anunciar(`${d.itens.length} item(s) retornado(s), página ${d.pagina}`)
+    } catch(e) { error(id, e.message) } finally { pronto(id) }
 }
 
 // ── Contratos ──
@@ -268,7 +309,7 @@ async function buscarContratos() {
         if (!d.itens.length) return empty(id)
         document.getElementById(id).innerHTML = `
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto"><table>
+            <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Resultados de contratos"><table>
                 <thead><tr>
                     <th>Nº</th><th>Objeto</th><th>Fornecedor</th>
                     <th>Situação</th><th>Assinatura</th><th>Valor Final (R$)</th>
@@ -276,13 +317,14 @@ async function buscarContratos() {
                 <tbody>${d.itens.map(i=>`<tr>
                     <td class="font-mono text-xs">${i.numero}</td>
                     <td class="text-xs max-w-xs">${i.objeto.substring(0,120)}${i.objeto.length>120?'…':''}</td>
-                    <td class="text-xs">${i.fornecedor.nome}<br><span class="text-gray-400">${i.fornecedor.cnpjFormatado}</span></td>
+                    <td class="text-xs">${i.fornecedor.nome}<br><span class="text-gray-500">${i.fornecedor.cnpjFormatado}</span></td>
                     <td><span class="badge badge-blue">${i.situacaoContrato}</span></td>
                     <td class="text-xs">${i.dataAssinatura||'—'}</td>
                     <td class="font-mono font-semibold text-green-700">${brl(i.valorFinalCompra)}</td>
                 </tr>`).join('')}</tbody>
             </table></div></div>${footer(d.pagina, d.itens.length)}`
-    } catch(e) { error(id, e.message) }
+        anunciar(`${d.itens.length} item(s) retornado(s), página ${d.pagina}`)
+    } catch(e) { error(id, e.message) } finally { pronto(id) }
 }
 
 // ── Licitações ──
@@ -298,7 +340,7 @@ async function buscarLicitacoes() {
         if (!d.itens.length) return empty(id)
         document.getElementById(id).innerHTML = `
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto"><table>
+            <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Resultados de licitações"><table>
                 <thead><tr>
                     <th>Modalidade</th><th>Situação</th><th>Instrumento Legal</th>
                     <th>Abertura</th><th>Publicação</th><th>Valor (R$)</th>
@@ -312,7 +354,8 @@ async function buscarLicitacoes() {
                     <td class="font-mono font-semibold text-green-700">${brl(i.valor)}</td>
                 </tr>`).join('')}</tbody>
             </table></div></div>${footer(d.pagina, d.itens.length)}`
-    } catch(e) { error(id, e.message) }
+        anunciar(`${d.itens.length} item(s) retornado(s), página ${d.pagina}`)
+    } catch(e) { error(id, e.message) } finally { pronto(id) }
 }
 
 // Busca automática inicial
