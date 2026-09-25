@@ -17,7 +17,7 @@ API REST assíncrona que expõe quatro datasets do [Portal da Transparência da 
 - **Ingestão com consulta local.** Cada página vinda do Portal passa pelos schemas Pydantic, é normalizada — datas em `DATE`, valores em `NUMERIC(16, 2)`, inclusive o texto `"1.234,56"` dos cartões — e gravada em background com upsert por `id`. Repetir uma consulta atualiza o registro em vez de duplicar, e a resposta não espera o banco. As rotas `/v1/{recurso}/armazenados` filtram o que já foi gravado por órgão, período e faixa de valor.
 - **Falha isolada.** Se o PostgreSQL cair, ou se `DATABASE_URL` não existir, as rotas do Portal continuam respondendo e só a consulta local devolve `503`. O `/health` não toca no banco, para um Postgres serverless poder dormir quando não há uso.
 - **Migrations versionadas.** SQLAlchemy 2 assíncrono (`asyncpg`) e Alembic: o ambiente sobe do zero com `alembic upgrade head`. A segunda migration converte as colunas de texto da primeira em `DATE` e `NUMERIC` sem perder dados (aceita `DD/MM/AAAA` e `AAAA-MM-DD`) e tem downgrade.
-- **Operação.** `GET /health`, CORS configurado e imagem Docker que lê a porta da variável `PORT`, com deploy no Render via blueprint (`render.yaml`).
+- **Operação.** `GET /health`, CORS configurado e imagem Docker que lê a porta da variável `PORT`, com deploy no Render via blueprint (`render.yaml`) e PostgreSQL gerenciado no Neon.
 
 ## Stack
 
