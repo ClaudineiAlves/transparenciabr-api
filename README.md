@@ -7,7 +7,7 @@
 
 API REST assíncrona que expõe quatro datasets do [Portal da Transparência da CGU](https://portaldatransparencia.gov.br/) — cartões corporativos, viagens a serviço, contratos e licitações — em endpoints versionados `/v1/`, com documentação Swagger/ReDoc gerada do próprio código. Cada página consultada é validada, normalizada e gravada em PostgreSQL, e o que já foi gravado pode ser filtrado por órgão, período e faixa de valor sem chamar o Portal de novo.
 
-**Demo:** https://transparenciabr-api.onrender.com/docs — hospedado no plano gratuito do Render; a primeira requisição após um período ocioso pode levar até um minuto.
+**Demo:** [página de busca](https://transparenciabr-api.onrender.com/) para consultar os dados sem escrever código, ou [Swagger](https://transparenciabr-api.onrender.com/docs) para testar os endpoints. Hospedado no plano gratuito do Render; a primeira requisição após um período ocioso pode levar até um minuto.
 
 ## Decisões de engenharia
 
@@ -219,6 +219,10 @@ tests/                 # pytest + pytest-asyncio + pytest-httpx
 Dockerfile
 docker-compose.yml     # PostgreSQL 16 + API com reload
 ```
+
+## Licença
+
+[MIT](LICENSE).
 
 ## Autor
 
