@@ -1,6 +1,8 @@
 name: Keep alive
 
-# O plano free do Render dorme após 15 min ocioso; o ping evita o cold start da demo.
+# O plano free do Render dorme após 15 min ocioso. Este ping é só um reforço: o GitHub atrasa
+# ou pula agendamentos em repos com pouca atividade, então ele não garante a demo acordada.
+# Para isso, use um monitor HTTP externo em /health a cada 5 min.
 # /health não toca no banco, então o Neon continua podendo dormir.
 on:
   schedule:
