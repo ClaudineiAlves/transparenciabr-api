@@ -1,9 +1,14 @@
 import httpx
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.clients import transparencia
 from app.core.exceptions import PortalIndisponivel
+from app.models.viagem import Viagem as ViagemModelo
+from app.schemas.armazenados import PaginaArmazenada, ViagemArmazenada
 from app.schemas.comum import Pagina
 from app.schemas.viagens import Viagem
+from app.services import armazenados, normalizacao, persistencia
+from app.services.armazenados import Filtros
 
 
 async def listar_viagens(
@@ -31,3 +36,25 @@ async def listar_viagens(
         raise PortalIndisponivel(str(exc)) from exc
 
     return Pagina(pagina=pagina, itens=[Viagem(**item) for item in data])
+
+
+async def salvar(itens: list[Viagem]) -> None:
+    await persistencia.salvar(ViagemModelo, itens, normalizacao.viagem)
+
+
+async def consultar_armazenados(
+    session: AsyncSession, filtros: Filtros
+) -> PaginaArmazenada[ViagemArmazenada]:
+    itens, total = await armazenados.consultar(
+        session,
+        ViagemModelo,
+        ViagemModelo.data_inicio_afastamento,
+        ViagemModelo.valor_total_viagem,
+        filtros,
+    )
+    return PaginaArmazenada(
+        pagina=filtros.pagina,
+        tamanho=filtros.tamanho,
+        total=total,
+        itens=[ViagemArmazenada.model_validate(item) for item in itens],
+    )

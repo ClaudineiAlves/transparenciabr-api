@@ -8,3 +8,5 @@ dist/
 .venv/
 .claude/
 CLAUDE.md
+# Cobertura gerada pelo pytest-cov
+.coverage

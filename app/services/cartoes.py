@@ -1,9 +1,14 @@
 import httpx
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.clients import transparencia
 from app.core.exceptions import PortalIndisponivel
+from app.models.cartao import Cartao
+from app.schemas.armazenados import GastoCartaoArmazenado, PaginaArmazenada
 from app.schemas.cartoes import GastoCartao
 from app.schemas.comum import Pagina
+from app.services import armazenados, normalizacao, persistencia
+from app.services.armazenados import Filtros
 
 
 async def listar_gastos(
@@ -34,3 +39,21 @@ async def listar_gastos(
         raise PortalIndisponivel(str(exc)) from exc
 
     return Pagina(pagina=pagina, itens=[GastoCartao(**item) for item in data])
+
+
+async def salvar(itens: list[GastoCartao]) -> None:
+    await persistencia.salvar(Cartao, itens, normalizacao.cartao)
+
+
+async def consultar_armazenados(
+    session: AsyncSession, filtros: Filtros
+) -> PaginaArmazenada[GastoCartaoArmazenado]:
+    itens, total = await armazenados.consultar(
+        session, Cartao, Cartao.data_transacao, Cartao.valor_transacao, filtros
+    )
+    return PaginaArmazenada(
+        pagina=filtros.pagina,
+        tamanho=filtros.tamanho,
+        total=total,
+        itens=[GastoCartaoArmazenado.model_validate(item) for item in itens],
+    )
