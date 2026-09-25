@@ -13,6 +13,11 @@ class ParametrosInvalidos(Exception):
         self.detalhe = detalhe
 
 
+class BancoIndisponivel(Exception):
+    def __init__(self, detalhe: str):
+        self.detalhe = detalhe
+
+
 async def handler_portal_indisponivel(
     request: Request, exc: PortalIndisponivel
 ) -> JSONResponse:
@@ -28,6 +33,15 @@ async def handler_parametros_invalidos(
     return JSONResponse(
         status_code=422,
         content={"mensagem": f"Parâmetros inválidos: {exc.detalhe}"},
+    )
+
+
+async def handler_banco_indisponivel(
+    request: Request, exc: BancoIndisponivel
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=503,
+        content={"mensagem": f"Banco de dados indisponível: {exc.detalhe}"},
     )
 
 

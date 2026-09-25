@@ -40,3 +40,8 @@ testpaths = ["tests"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
+
+[tool.coverage.run]
+# O SQLAlchemy assíncrono executa em greenlets; sem isso o código depois de um
+# await no banco aparece como não coberto.
+concurrency = ["greenlet", "thread"]
