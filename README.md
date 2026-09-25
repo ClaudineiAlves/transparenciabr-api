@@ -7,8 +7,7 @@
 
 API REST assíncrona que expõe quatro datasets do [Portal da Transparência da CGU](https://portaldatransparencia.gov.br/) — cartões corporativos, viagens a serviço, contratos e licitações — em endpoints versionados `/v1/`, com documentação Swagger/ReDoc gerada do próprio código.
 
-<!-- Quando o deploy voltar a responder, adicione aqui:
-**Demo:** https://transparenciabr-api-production.up.railway.app/docs -->
+**Demo:** https://transparenciabr-api.onrender.com/docs — hospedado no plano gratuito do Render; a primeira requisição após um período ocioso pode levar até um minuto.
 
 ## Decisões de engenharia
 
@@ -16,7 +15,7 @@ API REST assíncrona que expõe quatro datasets do [Portal da Transparência da 
 - **Integração resiliente.** O cliente `httpx` tem timeout explícito e faz retry automático quando o Portal responde `429`, respeitando o header `Retry-After`. Exceções próprias (`PortalIndisponivel`, `ParametrosInvalidos`) são tratadas em handlers centralizados: erro ou indisponibilidade do Portal vira resposta previsível da API, não stack trace.
 - **Testes que não dependem da fonte.** pytest + pytest-asyncio cobrindo os quatro recursos, com o Portal mockado via `pytest-httpx`: a suíte roda mesmo quando a API do governo está fora.
 - **Banco versionado.** PostgreSQL com SQLAlchemy 2 assíncrono (`asyncpg`) e migrations Alembic: o ambiente sobe do zero com `alembic upgrade head`, sem passo manual.
-- **Operação.** `GET /health`, CORS configurado e imagem Docker que lê a porta da variável `PORT`, pronta para PaaS como o Railway.
+- **Operação.** `GET /health`, CORS configurado e imagem Docker que lê a porta da variável `PORT`, com deploy no Render via blueprint (`render.yaml`).
 
 ## Stack
 
