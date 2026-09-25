@@ -147,6 +147,27 @@ GET {{base}}/v1/licitacoes
 
 
 # ─────────────────────────────────────────────
+# CONSULTA LOCAL — GET /v1/{recurso}/armazenados
+#
+# Lê o que já foi gravado no PostgreSQL, sem chamar o Portal.
+# Filtros opcionais: codigo_orgao, data_de, data_ate (AAAA-MM-DD),
+#   valor_min, valor_max, pagina, tamanho (padrão 50, máximo 500)
+# ─────────────────────────────────────────────
+
+### Contratos do MEC em janeiro/2025 acima de R$ 10 mil
+GET {{base}}/v1/contratos/armazenados?codigo_orgao=26000&data_de=2025-01-01&data_ate=2025-01-31&valor_min=10000
+
+### Gastos com cartão de até R$ 500
+GET {{base}}/v1/cartoes/armazenados?valor_max=500
+
+### Viagens gravadas, 10 por página
+GET {{base}}/v1/viagens/armazenados?tamanho=10
+
+### Licitações de um órgão
+GET {{base}}/v1/licitacoes/armazenados?codigo_orgao=26000
+
+
+# ─────────────────────────────────────────────
 # CÓDIGOS DE ÓRGÃOS (SIAFI) — referência rápida
 #
 #   26000  Ministério da Educação (MEC)
