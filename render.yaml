@@ -5,13 +5,8 @@ services:
     plan: free
     healthCheckPath: /health
     envVars:
+      # Postgres no Neon (free, não expira); defina o valor no dashboard do Render.
       - key: DATABASE_URL
-        fromDatabase:
-          name: transparenciabr-db
-          property: connectionString
+        sync: false
       - key: TRANSPARENCIA_API_KEY
         sync: false
-
-databases:
-  - name: transparenciabr-db
-    plan: free
