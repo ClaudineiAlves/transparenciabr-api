@@ -54,8 +54,9 @@
         <button role="tab" aria-selected="false" aria-controls="tab-licitacoes" tabindex="-1" onclick="showTab('licitacoes')" id="btn-licitacoes" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-gray-500 hover:bg-gray-50"><span aria-hidden="true">🏛️</span> Licitações</button>
     </div>
 
-    <!-- Anuncia o fim de cada busca sem o leitor de tela ler a tabela inteira -->
-    <p id="status-busca" class="sr-only" role="status" aria-live="polite"></p>
+    <!-- Anuncia o fim de cada busca sem o leitor de tela ler a tabela inteira.
+         É um div com aria-live, não role="status": o Orca não anuncia texto em role="status" -->
+    <div id="status-busca" class="sr-only" aria-live="polite"></div>
 
     <!-- ── CARTÕES ── -->
     <div id="tab-cartoes" class="tab-panel" role="tabpanel" aria-labelledby="btn-cartoes">
