@@ -50,11 +50,18 @@ Requisitos: Python 3.11+ e, para gravar e consultar, um PostgreSQL acessível.
 ```bash
 python -m venv .venv
 source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
+pip install -r requirements-dev.txt && pip install --no-deps -e .
 
 cp .env.example .env           # edite com suas credenciais
 alembic upgrade head
 uvicorn app.main:app --reload
+```
+
+As versões ficam travadas em `requirements.txt` (produção, usado no Docker) e `requirements-dev.txt` (com as ferramentas de teste, usado no CI), gerados do `pyproject.toml` pelo [uv](https://docs.astral.sh/uv/). Depois de mudar uma dependência no `pyproject.toml`, regere os dois:
+
+```bash
+uv pip compile pyproject.toml --universal --python-version 3.11 -o requirements.txt
+uv pip compile pyproject.toml --extra dev --universal --python-version 3.11 -o requirements-dev.txt
 ```
 
 Variáveis de ambiente:
@@ -218,6 +225,8 @@ static/index.html      # página servida na raiz
 tests/                 # pytest + pytest-asyncio + pytest-httpx
 Dockerfile
 docker-compose.yml     # PostgreSQL 16 + API com reload
+requirements.txt       # versões travadas de produção (geradas do pyproject.toml)
+requirements-dev.txt   # idem, com as ferramentas de teste
 ```
 
 ## Licença

@@ -2,8 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY pyproject.toml .
-RUN pip install --no-cache-dir -e "."
+# Versões travadas em requirements.txt (gerado do pyproject.toml pelo uv); o pacote
+# em si entra sem dependências para não resolver nada de novo no build
+COPY pyproject.toml requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir --no-deps -e "."
 
 COPY . .
 
