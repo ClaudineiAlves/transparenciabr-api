@@ -58,7 +58,8 @@ app.add_exception_handler(httpx.HTTPStatusError, handler_http_status)
 app.include_router(v1_router)
 
 
-@app.get("/health")
+# HEAD também: monitores externos (UptimeRobot) checam com HEAD, e só GET dava 405
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health():
     return {"status": "ok"}
 
