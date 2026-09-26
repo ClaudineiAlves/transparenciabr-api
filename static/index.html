@@ -212,13 +212,13 @@ function empty(id) {
 function error(id, msg) {
     document.getElementById(id).innerHTML = `
         <div class="bg-red-50 border border-red-200 rounded-xl p-5 text-red-700 text-sm">
-            <strong>Erro:</strong> ${msg}
+            <strong>Erro:</strong> ${esc(msg)}
         </div>`
     anunciar('Erro: ' + msg)
 }
 
 function footer(pagina, total) {
-    return `<p class="text-xs text-gray-600 mt-2 px-1">Página ${pagina} · ${total} item(s) retornado(s)</p>`
+    return `<p class="text-xs text-gray-600 mt-2 px-1">Página ${esc(pagina)} · ${esc(total)} item(s) retornado(s)</p>`
 }
 
 async function get(path, params) {
@@ -226,6 +226,11 @@ async function get(path, params) {
     const data = await res.json()
     if (!res.ok) throw new Error(data.mensagem || JSON.stringify(data.detail) || 'Erro na API')
     return data
+}
+
+// Os dados vêm do Portal da Transparência; escapa antes de montar HTML
+function esc(v) {
+    return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
 }
 
 function brl(v) {
@@ -251,12 +256,12 @@ async function buscarCartoes() {
                     <th>Estabelecimento</th><th>Órgão</th><th>Portador</th>
                 </tr></thead>
                 <tbody>${d.itens.map(i=>`<tr>
-                    <td>${i.dataTransacao}</td>
-                    <td class="font-mono font-semibold text-green-700">${i.valorTransacao}</td>
-                    <td class="text-xs">${i.tipoCartao.descricao}</td>
-                    <td>${i.estabelecimento.nome}<br><span class="text-gray-500 text-xs">${i.estabelecimento.cnpjFormatado}</span></td>
-                    <td class="text-xs">${i.unidadeGestora.orgaoMaximo.sigla}</td>
-                    <td class="text-xs">${i.portador.nome}</td>
+                    <td>${esc(i.dataTransacao)}</td>
+                    <td class="font-mono font-semibold text-green-700">${esc(i.valorTransacao)}</td>
+                    <td class="text-xs">${esc(i.tipoCartao.descricao)}</td>
+                    <td>${esc(i.estabelecimento.nome)}<br><span class="text-gray-500 text-xs">${esc(i.estabelecimento.cnpjFormatado)}</span></td>
+                    <td class="text-xs">${esc(i.unidadeGestora.orgaoMaximo.sigla)}</td>
+                    <td class="text-xs">${esc(i.portador.nome)}</td>
                 </tr>`).join('')}</tbody>
             </table></div></div>${footer(d.pagina, d.itens.length)}`
         anunciar(`${d.itens.length} item(s) retornado(s), página ${d.pagina}`)
@@ -284,10 +289,10 @@ async function buscarViagens() {
                     <th>Período</th><th>Passagem (R$)</th><th>Total (R$)</th>
                 </tr></thead>
                 <tbody>${d.itens.map(i=>`<tr>
-                    <td class="font-medium">${i.beneficiario.nome}</td>
-                    <td><span class="badge ${i.situacao==='Realizada'?'badge-green':'badge-yellow'}">${i.situacao}</span></td>
-                    <td class="text-xs">${i.tipoViagem}</td>
-                    <td class="text-xs">${i.dataInicioAfastamento}<br>até ${i.dataFimAfastamento}</td>
+                    <td class="font-medium">${esc(i.beneficiario.nome)}</td>
+                    <td><span class="badge ${i.situacao==='Realizada'?'badge-green':'badge-yellow'}">${esc(i.situacao)}</span></td>
+                    <td class="text-xs">${esc(i.tipoViagem)}</td>
+                    <td class="text-xs">${esc(i.dataInicioAfastamento)}<br>até ${esc(i.dataFimAfastamento)}</td>
                     <td class="font-mono text-green-700">${brl(i.valorTotalPassagem)}</td>
                     <td class="font-mono font-semibold text-green-700">${brl(i.valorTotalViagem)}</td>
                 </tr>`).join('')}</tbody>
@@ -315,11 +320,11 @@ async function buscarContratos() {
                     <th>Situação</th><th>Assinatura</th><th>Valor Final (R$)</th>
                 </tr></thead>
                 <tbody>${d.itens.map(i=>`<tr>
-                    <td class="font-mono text-xs">${i.numero}</td>
-                    <td class="text-xs max-w-xs">${i.objeto.substring(0,120)}${i.objeto.length>120?'…':''}</td>
-                    <td class="text-xs">${i.fornecedor.nome}<br><span class="text-gray-500">${i.fornecedor.cnpjFormatado}</span></td>
-                    <td><span class="badge badge-blue">${i.situacaoContrato}</span></td>
-                    <td class="text-xs">${i.dataAssinatura||'—'}</td>
+                    <td class="font-mono text-xs">${esc(i.numero)}</td>
+                    <td class="text-xs max-w-xs">${esc(i.objeto.substring(0,120))}${i.objeto.length>120?'…':''}</td>
+                    <td class="text-xs">${esc(i.fornecedor.nome)}<br><span class="text-gray-500">${esc(i.fornecedor.cnpjFormatado)}</span></td>
+                    <td><span class="badge badge-blue">${esc(i.situacaoContrato)}</span></td>
+                    <td class="text-xs">${esc(i.dataAssinatura||'—')}</td>
                     <td class="font-mono font-semibold text-green-700">${brl(i.valorFinalCompra)}</td>
                 </tr>`).join('')}</tbody>
             </table></div></div>${footer(d.pagina, d.itens.length)}`
@@ -346,11 +351,11 @@ async function buscarLicitacoes() {
                     <th>Abertura</th><th>Publicação</th><th>Valor (R$)</th>
                 </tr></thead>
                 <tbody>${d.itens.map(i=>`<tr>
-                    <td class="text-xs">${i.modalidadeLicitacao||'—'}</td>
-                    <td><span class="badge badge-purple">${i.situacaoCompra||'—'}</span></td>
-                    <td class="text-xs">${i.instrumentoLegal||'—'}</td>
-                    <td class="text-xs">${i.dataAbertura||'—'}</td>
-                    <td class="text-xs">${i.dataPublicacao||'—'}</td>
+                    <td class="text-xs">${esc(i.modalidadeLicitacao||'—')}</td>
+                    <td><span class="badge badge-purple">${esc(i.situacaoCompra||'—')}</span></td>
+                    <td class="text-xs">${esc(i.instrumentoLegal||'—')}</td>
+                    <td class="text-xs">${esc(i.dataAbertura||'—')}</td>
+                    <td class="text-xs">${esc(i.dataPublicacao||'—')}</td>
                     <td class="font-mono font-semibold text-green-700">${brl(i.valor)}</td>
                 </tr>`).join('')}</tbody>
             </table></div></div>${footer(d.pagina, d.itens.length)}`
